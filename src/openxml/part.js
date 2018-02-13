@@ -48,7 +48,9 @@ export default class Part{
 		if(rel.attr("TargetMode")==='External')
 			return {url:target}
 
-		switch(rel.attr("Type").split("/").pop()){
+        var relType = rel.attr("Type") || ''; //avoid undefined
+
+        switch(relType.split("/").pop()){
 		case 'image':
 			let url=this.doc.getDataPartAsUrl(this.folder+target, "image/*")
 			let crc32=this.doc.getPartCrc32(this.folder+target)
