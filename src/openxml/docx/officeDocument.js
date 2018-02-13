@@ -218,8 +218,13 @@ const identities={
 		}
 	},
 	hyperlink(wXml,officeDocument){
-		let url=officeDocument.getRel(wXml.attribs["r:id"])
-		return {type:"hyperlink", url}
+        if (wXml.attribs["r:id"]) {
+            let url=officeDocument.getRel(wXml.attribs["r:id"])
+            return {type:"hyperlink", url};
+        } else if (wXml.attribs['w:anchor']) {
+        	let name = wXml.attribs['w:anchor']; //TODO
+            return {type:'anchor', name};
+        }
 	},
 	tbl(wXml){
 		return wXml.children.reduce((state,node)=>{

@@ -44,7 +44,7 @@ export default class Part{
 
 	getRel(id){
 		var rel=this.rels(`Relationship[Id="${id}"]`)
-		var target=rel.attr("Target")
+		var target=rel.attr("Target") || '';
 		if(rel.attr("TargetMode")==='External')
 			return {url:target}
 
