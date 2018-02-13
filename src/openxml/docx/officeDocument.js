@@ -26,7 +26,7 @@ export class OfficeDocument extends Part{
 		return this.renderNode(this.content("w\\:document").get(0),createElement, identify)
 	}
 
-	parse(domHandler,identify=officeDocument.identify){
+	parse(domHandler,identify=OfficeDocument.identify){
 		const doc={}
 		const createElement=domHandler.createElement.bind(domHandler)
 		function _identify(){
