@@ -117,6 +117,11 @@ export const identities={
 				}
 			}
 		}
+        identity.wt = function() {
+			return $.find('w\\:t').map(function (index, element) {
+                return element.children;
+            }).get();
+        };
 
 		return identity
 	},
