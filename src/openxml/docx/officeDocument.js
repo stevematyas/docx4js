@@ -113,6 +113,7 @@ export const identities={
 				if(outlineLvl){
 					identity.type="heading"
 					identity.level=parseInt(outlineLvl)+1
+                    identity.styleId=styleId
 				}
 			}
 		}
