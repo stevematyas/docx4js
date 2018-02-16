@@ -59,7 +59,7 @@ export class OfficeDocument extends Part{
 
 export default OfficeDocument
 
-const identities={
+export const identities={
 	document(wXml,officeDocument){
 		let $=officeDocument.content
 		let current=null
