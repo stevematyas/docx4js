@@ -1,14 +1,21 @@
 import docx4js from "../../src"
 
 describe("model identifier", function(){
-	function identify(content,expected, officeDocument={}){
-		let $=docx4js.parseXml(content)
+	function identify(xmlDocContent,expectedModelType, officeDocument={},xmlStyles){
+		let $=docx4js.parseXml(xmlDocContent)
 		let node=$.root().contents().get(0)
-		expect(!!node).toBe(true)
-		let identified=docx4js.OfficeDocument.identify(node,Object.assign({content:$},officeDocument))
 
-		if(expected)
-			expect(identified.type).toBe(expected)
+        let $styles = function () {
+			console.error('Include styles XML as model function uses "styles(...)"')
+        }
+		if (xmlStyles) {
+			$styles = docx4js.parseXml(xmlStyles)
+        }
+		expect(!!node).toBe(true)
+		let identified=docx4js.OfficeDocument.identify(node,Object.assign({content:$, styles:$styles},officeDocument))
+
+		if(expectedModelType)
+			expect(identified.type).toBe(expectedModelType)
 
 		return identified
 	}
@@ -17,7 +24,21 @@ describe("model identifier", function(){
 			identify(`<w:document><w:body/></w:document>`,"document")
         })
 
-
+        const xmlStyles=a=>`
+				<w:styles>
+					<w:docDefaults>
+						<w:rPrDefault>
+							<w:rPr>
+								<w:rFonts w:ascii="Calibri" w:eastAsia="Calibri" w:hAnsi="Calibri" w:cs="Times New Roman"/>
+								<w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="ar-SA"/>
+							</w:rPr>
+						</w:rPrDefault>
+						<w:pPrDefault/>
+					</w:docDefaults>
+					<w:latentStyles/>
+					${a||""}
+				</w:styles>
+			`
 
 		describe("section", function(){
 			const xml=a=>`
@@ -28,6 +49,7 @@ describe("model identifier", function(){
 					</w:body>
 				</w:document>
 			`
+
 			it("section",()=>{
 				identify(`<w:sectPr/>`,"section")
 			})
@@ -70,6 +92,70 @@ describe("model identifier", function(){
 
         it("paragraph", ()=>{
 			identify(`<w:p/>`,"p")
+        })
+
+        it('heading', ()=> {
+            const xml=a=>`
+				<w:document>
+					<w:body>
+						${a||""}
+						<w:sectPr/>
+					</w:body>
+				</w:document>
+			`
+            let _xml = '<w:p w14:paraId="64408704" w14:textId="77777777" w:rsidR="00337311" w:rsidRPr="00AF2845"\n' +
+                '             w:rsidRDefault="009822EB" w:rsidP="00337311">\n' +
+                '            <w:pPr>\n' +
+                '                <w:pStyle w:val="1TitleProduct"/>\n' +
+                '                <w:rPr>\n' +
+                '                    <w:b w:val="0"/>\n' +
+                '                </w:rPr>\n' +
+                '            </w:pPr>\n' +
+                '            <w:bookmarkStart w:id="0" w:name="_GoBack"/>\n' +
+                '            <w:bookmarkEnd w:id="0"/>\n' +
+                '            <w:r>\n' +
+                '                <w:t>Ramucirumab</w:t>\n' +
+                '            </w:r>\n' +
+                '        </w:p>'
+
+			let _style = '<w:style w:type="paragraph" w:customStyle="1" w:styleId="1TitleMain">\n' +
+                '        <w:name w:val="1TitleMain"/>\n' +
+                '        <w:basedOn w:val="Normal"/>\n' +
+                '        <w:next w:val="1SubTitleSumm"/>\n' +
+                '        <w:rsid w:val="009C19B1"/>\n' +
+                '        <w:pPr>\n' +
+                '            <w:tabs>\n' +
+                '                <w:tab w:val="clear" w:pos="720"/>\n' +
+                '                <w:tab w:val="clear" w:pos="8640"/>\n' +
+                '            </w:tabs>\n' +
+                '            <w:spacing w:after="240"/>\n' +
+                '            <w:jc w:val="center"/>\n' +
+                '            <w:outlineLvl w:val="0"/>\n' +
+                '        </w:pPr>\n' +
+                '        <w:rPr>\n' +
+                '            <w:rFonts w:ascii="Times New Roman Bold" w:hAnsi="Times New Roman Bold"/>\n' +
+                '            <w:b/>\n' +
+                '            <w:sz w:val="28"/>\n' +
+                '        </w:rPr>\n' +
+                '    </w:style>'
+            let officeDocument = {};
+            let {children:sections} = identify(xml(_xml),"document", officeDocument, xmlStyles(_style))
+            expect(sections.length).toBe(1)
+            let [first]=sections
+            expect(first.content.length).toBe(1)
+
+			console.log(first);
+            let [p1]=first.content
+            console.log(p1);
+            expect(p1.attribs['w14:paraId']).toBe("64408704")
+			let $ = officeDocument.content;
+
+            // expect(model.type).toBe("tag")
+            // expect(model.name).toBe("p")
+            // expect(model.type).toBe("heading")
+            // expect(model.level).toBe("1")
+            // expect(model.styleId).toBe("1TitleMain")
+
         })
 
         it("run",()=>{
