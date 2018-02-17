@@ -132,16 +132,16 @@ export const identities = {
     },
     r(wXml, officeDocument) {
         let $ = officeDocument.content(wXml);
-        let rPr = wXml.children.find(({name}) => name == "w:rPr")
-        var parent_pPr_rPr = $.parent("w\\:p").find("w\\:pPr>w\\:rPr")
+        let rPr = wXml.children.find(({name}) => name == "w:rPr") || []
+        var parent_pPr_rPr = $.parent("w\\:p").find("w\\:pPr>w\\:rPr").get();
 
         if (parent_pPr_rPr.length) {
             if(rPr.length)
-                rPr.concat(pPr_rPr)
+                rPr.concat(parent_pPr_rPr)
             else
-                rPr = pPr_rPr
+                rPr = parent_pPr_rPr
         }
-        return {type: "r", pr: rPr, children: wXml.children.filter(({name}) => name != "w:rPr")}
+        return {type: "r", pr: rPr, children: wXml.children.filter(({name}) => name != "w:rPr") || []}
     },
     fldChar(wXml, officeDocument) {
         return wXml.attribs["w:fldCharType"]
