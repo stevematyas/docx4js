@@ -144,9 +144,9 @@ describe("model identifier", function(){
             let [first]=sections
             expect(first.content.length).toBe(1)
 
-			console.log(first);
+			// console.log(first);
             let [p1]=first.content
-            console.log(p1);
+            // console.log(p1);
             expect(p1.attribs['w14:paraId']).toBe("64408704")
 			let $ = officeDocument.content;
 
@@ -159,7 +159,23 @@ describe("model identifier", function(){
         })
 
         it("run",()=>{
-			identify(`<w:r/>`,"r")
+			let r = identify(`<w:r/>`,"r")
+			expect(r.pr.length).toBe(0)
+        })
+		it("run with rPr",()=>{
+			let _xml = '<w:r w:rsidRPr="008960AE">\n' +
+                '                <w:rPr>\n' +
+                '                    <w:b/>\n' +
+                '                </w:rPr>\n' +
+				'                <w:rPr>\n' +
+                '                    <w:u/>\n' +
+                '                </w:rPr>\n' +
+                '                <w:t>See important safety information, including boxed warning, in the attached prescribing\n' +
+                '                    information\n' +
+                '                </w:t>\n' +
+                '            </w:r>';
+			let r = identify(_xml,"r")
+			expect(r.pr.length).toBe(2)
         })
 
 		it("chunk", ()=>{
